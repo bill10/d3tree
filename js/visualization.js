@@ -4,10 +4,10 @@
   var treeFile = "amazon_tree.json";
   var entryPointSelector = "body";
 
-  var margin    = {top: 30, right: 20, bottom: 30, left: 20};
+  var margin    = {top: 10, right: 20, bottom: 30, left: 20};
   var width     = 960 - margin.left - margin.right;
   var barHeight = 20;
-  var barWidth  = width * 0.8;
+  var barWidth  = 500;
 
   var i         = 0;
   var duration  = 400;
@@ -32,8 +32,8 @@
     update(root);
   }
 
-  var errorPlotAxisStart = 400;
-  var errorPlotAxisEnd   = 700;
+  var errorPlotAxisStart = 200;
+  var errorPlotAxisEnd   = 500;
   var errorPlotAxisLen   = errorPlotAxisEnd - errorPlotAxisStart;
 
   d3.json(treeFile, function(error, data) {
@@ -79,6 +79,8 @@
       .attr("height", barHeight)
       .attr("width", barWidth)
       .style("fill", getNodeColor)
+      .style("stroke","gray")
+      .style("stroke-width",1)
       .on("click", toggleChildren);
 
     nodeEnter.append("text")
@@ -90,19 +92,44 @@
       .attr("class", "dot-error-plot");
 
     // FIXME: clean up "do not draw" behavior
-    dotErrorPlot.append("line")
-      .attr("x1", function (d) {
-        return d.index === "NA" || d.ci === "NA" ? 0 : errorPlotAxisStart;
-      })
-      .attr("y1", 0)
-      .attr("x2", function (d) {
-        return d.index === "NA" || d.ci === "NA" ? 0 : errorPlotAxisEnd;
-      })
-      .attr("y2", 0)
-      .attr("stroke", "gray")
-      .attr("stroke-width", "1.5");
+//    dotErrorPlot.append("line")
+//      .attr("x1", function (d) {
+//        return d.index === "NA" || d.ci === "NA" ? 0 : errorPlotAxisStart;
+//      })
+//      .attr("y1", 0)
+//      .attr("x2", function (d) {
+//        return d.index === "NA" || d.ci === "NA" ? 0 : errorPlotAxisEnd;
+//      })
+//      .attr("y2", 0)
+//      .attr("stroke", "gray")
+//      .attr("stroke-width", "1.5");
 
     dotErrorPlot.append("line")
+      .attr("x1", errorPlotAxisStart )
+      .attr("y1", -barHeight / 2)
+      .attr("x2", errorPlotAxisStart)
+      .attr("y2", barHeight / 2)
+      .attr("stroke", "gray")
+      .attr("stroke-width", "1");
+
+    dotErrorPlot.append("line")
+      .attr("x1", errorPlotAxisEnd )
+      .attr("y1", -barHeight / 2)
+      .attr("x2", errorPlotAxisEnd)
+      .attr("y2", barHeight / 2)
+      .attr("stroke", "gray")
+      .attr("stroke-width", "1");
+
+    dotErrorPlot.append("line")
+      .attr("x1", errorPlotAxisLen/2 + errorPlotAxisStart )
+      .attr("y1", -barHeight / 2)
+      .attr("x2", errorPlotAxisLen/2 + errorPlotAxisStart )
+      .attr("y2", barHeight / 2)
+      .attr("stroke", "black")
+      .attr("stroke-dasharray", ("5, 3"))
+      .attr("stroke-width", "1");
+
+     dotErrorPlot.append("line")
       .attr("class", "ci")
       .attr("x1", function (d) {
         if (d.index === "NA" || d.ci === "NA") return 0;
@@ -122,8 +149,8 @@
                         errorPlotAxisEnd);
       })
       .attr("y2", 0)
-      .attr("stroke", "crimson")       // TODO: make dynamic
-      .attr("stroke-width", "1.5");
+      .attr("stroke", "black")       // TODO: make dynamic
+      .attr("stroke-width", "1");
 
     dotErrorPlot.append("circle")
       .attr("cx", function (d) {
@@ -134,7 +161,9 @@
       .attr("r", function (d) {
         return d.index === "NA" || d.ci === "NA" ? 0 : 5;
       })
-      .attr("fill", "rebeccapurple");  // TODO: make dynamic
+      .attr("fill", function (d) {
+	var red=Math.round(d.index*255), blue=Math.round((1-d.index)*255); 
+	return "rgb("+red+",0,"+blue+")";}); // TODO: make dynamic
 
     // Transition nodes to their new position.
     nodeEnter.transition()
@@ -163,33 +192,33 @@
       .remove();
 
     // Update the links…
-    var link = svg.selectAll("path.link")
-      .data(tree.links(nodes), function(d) { return d.target.id; });
+//    var link = svg.selectAll("path.link")
+//      .data(tree.links(nodes), function(d) { return d.target.id; });
 
     // Enter any new links at the parent's previous position.
-    link.enter().insert("path", "g")
-      .attr("class", "link")
-      .attr("d", function(d) {
-        var o = {x: source.x0, y: source.y0};
-        return diagonal({source: o, target: o});
-      })
-      .transition()
-      .duration(duration)
-      .attr("d", diagonal);
+//    link.enter().insert("path", "g")
+//      .attr("class", "link")
+//      .attr("d", function(d) {
+//        var o = {x: source.x0, y: source.y0};
+//        return diagonal({source: o, target: o});
+//      })
+//      .transition()
+//      .duration(duration)
+//      .attr("d", diagonal);
 
     // Transition links to their new position.
-    link.transition()
-      .duration(duration)
-      .attr("d", diagonal);
+//    link.transition()
+//      .duration(duration)
+//      .attr("d", diagonal);
 
     // Transition exiting nodes to the parent's new position.
-    link.exit().transition()
-      .duration(duration)
-      .attr("d", function(d) {
-        var o = {x: source.x, y: source.y};
-        return diagonal({source: o, target: o});
-      })
-      .remove();
+//    link.exit().transition()
+//      .duration(duration)
+//      .attr("d", function(d) {
+//        var o = {x: source.x, y: source.y};
+//        return diagonal({source: o, target: o});
+//      })
+//      .remove();
 
     // Stash the old positions for transition.
     nodes.forEach(function(d) {
@@ -220,6 +249,7 @@
 
 
   function getNodeColor(d) {
-    return d._children ? "#3182bd" : d.children ? "#c6dbef" : "#fd8d3c";
+    return "lightgray";
+    //return d._children ? "#3182bd" : d.children ? "#c6dbef" : "#fd8d3c";
   }
 })();
