@@ -35,6 +35,13 @@
   var errorPlotAxisStart = 200;
   var errorPlotAxisEnd   = 500;
   var errorPlotAxisLen   = errorPlotAxisEnd - errorPlotAxisStart;
+  
+  var tooltip = d3.select("body")
+	.append("div")
+	.style("position", "absolute")
+	.style("z-index", "10")
+	.style("visibility", "hidden")
+        .style("font", "12px sans-serif");
 
   d3.json(treeFile, function(error, data) {
     data.x0 = 0;
@@ -163,7 +170,10 @@
       })
       .attr("fill", function (d) {
 	var red=Math.round(d.index*255), blue=Math.round((1-d.index)*255); 
-	return "rgb("+red+",0,"+blue+")";}); // TODO: make dynamic
+	return "rgb("+red+",0,"+blue+")";})
+        .on("mouseover", function(){return tooltip.style("visibility", "visible");})
+	.on("mousemove", function(d){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px").text(d.index+' \xB1 '+d.ci);})
+	.on("mouseout", function(){return tooltip.style("visibility", "hidden");}); // TODO: make dynamic
 
     // Transition nodes to their new position.
     nodeEnter.transition()
