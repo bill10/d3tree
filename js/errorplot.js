@@ -1,7 +1,7 @@
 "use strict";
 
 (function () {
-  var treeFile = "amazon_tree.json";
+  var treeFile = "mean.json";
   var entryPointSelector = "body";
 
   var margin    = {top: 10, right: 20, bottom: 30, left: 20};
