@@ -1,7 +1,7 @@
 "use strict";
 
 (function () {
-  var treeFile = "mean.json";
+  var treeFile = "amazon_tree.json";
   var entryPointSelector = "body";
 
   var margin    = {top: 10, right: 20, bottom: 30, left: 20};
@@ -41,7 +41,7 @@
 	.style("position", "absolute")
 	.style("z-index", "10")
 	.style("visibility", "hidden")
-        .style("font", "12px sans-serif");
+    .style("font", "12px sans-serif");
 
   d3.json(treeFile, function(error, data) {
     data.x0 = 0;
@@ -88,7 +88,10 @@
       .style("fill", getNodeColor)
       .style("stroke","gray")
       .style("stroke-width",1)
-      .on("click", toggleChildren);
+      .on("click", toggleChildren)
+      .on("mouseover", function(){return tooltip.style("visibility", "visible");})
+      .on("mousemove", function(d){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px").text("red std_books std_subtopics std/skew var_ratio sales books pbooks");})
+      .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
     nodeEnter.append("text")
       .attr("dy", 3.5)
@@ -97,83 +100,6 @@
 
     var dotErrorPlot = nodeEnter.append("g")
       .attr("class", "dot-error-plot");
-
-    // FIXME: clean up "do not draw" behavior
-//    dotErrorPlot.append("line")
-//      .attr("x1", function (d) {
-//        return d.index === "NA" || d.ci === "NA" ? 0 : errorPlotAxisStart;
-//      })
-//      .attr("y1", 0)
-//      .attr("x2", function (d) {
-//        return d.index === "NA" || d.ci === "NA" ? 0 : errorPlotAxisEnd;
-//      })
-//      .attr("y2", 0)
-//      .attr("stroke", "gray")
-//      .attr("stroke-width", "1.5");
-
-    dotErrorPlot.append("line")
-      .attr("x1", errorPlotAxisStart )
-      .attr("y1", -barHeight / 2)
-      .attr("x2", errorPlotAxisStart)
-      .attr("y2", barHeight / 2)
-      .attr("stroke", "gray")
-      .attr("stroke-width", "1");
-
-    dotErrorPlot.append("line")
-      .attr("x1", errorPlotAxisEnd )
-      .attr("y1", -barHeight / 2)
-      .attr("x2", errorPlotAxisEnd)
-      .attr("y2", barHeight / 2)
-      .attr("stroke", "gray")
-      .attr("stroke-width", "1");
-
-    dotErrorPlot.append("line")
-      .attr("x1", errorPlotAxisLen/2 + errorPlotAxisStart )
-      .attr("y1", -barHeight / 2)
-      .attr("x2", errorPlotAxisLen/2 + errorPlotAxisStart )
-      .attr("y2", barHeight / 2)
-      .attr("stroke", "black")
-      .attr("stroke-dasharray", ("5, 3"))
-      .attr("stroke-width", "1");
-
-     dotErrorPlot.append("line")
-      .attr("class", "ci")
-      .attr("x1", function (d) {
-        if (d.index === "NA" || d.ci === "NA") return 0;
-
-        var errorPlotPoint = (d.index * errorPlotAxisLen + errorPlotAxisStart);
-
-        return Math.max(errorPlotPoint - errorPlotAxisLen * d.ci,
-                        errorPlotAxisStart);
-      })
-      .attr("y1", 0)
-      .attr("x2", function (d) {
-        if (d.index === "NA" || d.ci === "NA") return 0;
-
-        var errorPlotPoint = (d.index * errorPlotAxisLen + errorPlotAxisStart);
-
-        return Math.min(errorPlotPoint + errorPlotAxisLen * d.ci,
-                        errorPlotAxisEnd);
-      })
-      .attr("y2", 0)
-      .attr("stroke", "black")       // TODO: make dynamic
-      .attr("stroke-width", "1");
-
-    dotErrorPlot.append("circle")
-      .attr("cx", function (d) {
-        if (d.index === "NA" || d.ci === "NA") return 0;
-        else return d.index * errorPlotAxisLen + errorPlotAxisStart;
-      })
-      .attr("cy", 0)
-      .attr("r", function (d) {
-        return d.index === "NA" || d.ci === "NA" ? 0 : 5;
-      })
-      .attr("fill", function (d) {
-	var red=Math.round(d.index*255), blue=Math.round((1-d.index)*255); 
-	return "rgb("+red+",0,"+blue+")";})
-      .on("mouseover", function(){return tooltip.style("visibility", "visible");})
-	  .on("mousemove", function(d){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px").text(d.index+' \xB1 '+d.ci);})
-	  .on("mouseout", function(){return tooltip.style("visibility", "hidden");}); // TODO: make dynamic
 
     // Transition nodes to their new position.
     nodeEnter.transition()
@@ -200,35 +126,6 @@
       })
       .style("opacity", 1e-6)
       .remove();
-
-    // Update the links…
-//    var link = svg.selectAll("path.link")
-//      .data(tree.links(nodes), function(d) { return d.target.id; });
-
-    // Enter any new links at the parent's previous position.
-//    link.enter().insert("path", "g")
-//      .attr("class", "link")
-//      .attr("d", function(d) {
-//        var o = {x: source.x0, y: source.y0};
-//        return diagonal({source: o, target: o});
-//      })
-//      .transition()
-//      .duration(duration)
-//      .attr("d", diagonal);
-
-    // Transition links to their new position.
-//    link.transition()
-//      .duration(duration)
-//      .attr("d", diagonal);
-
-    // Transition exiting nodes to the parent's new position.
-//    link.exit().transition()
-//      .duration(duration)
-//      .attr("d", function(d) {
-//        var o = {x: source.x, y: source.y};
-//        return diagonal({source: o, target: o});
-//      })
-//      .remove();
 
     // Stash the old positions for transition.
     nodes.forEach(function(d) {

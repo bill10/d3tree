@@ -1,13 +1,13 @@
 "use strict";
 
 (function () {
-  var treeFile = "variance.json";
+  var treeFile = "std.json";
   var entryPointSelector = "body";
 
   var margin    = {top: 10, right: 20, bottom: 30, left: 20};
-  var width     = 960 - margin.left - margin.right;
+  var width     = 700 - margin.left - margin.right;
   var barHeight = 20;
-  var barWidth  = 500;
+  var barWidth  = 600;
 
   var i         = 0;
   var duration  = 400;
@@ -32,8 +32,8 @@
     update(root);
   }
 
-  var errorPlotAxisStart = 200;
-  var errorPlotAxisEnd   = 500;
+  var errorPlotAxisStart = 300;
+  var errorPlotAxisEnd   = 600;
   var errorPlotAxisLen   = errorPlotAxisEnd - errorPlotAxisStart;
   
   var tooltip = d3.select("body")
@@ -127,21 +127,25 @@
       .attr("stroke", "gray")
       .attr("stroke-width", "1");
 
-    dotErrorPlot.append("line")
-      .attr("x1", errorPlotAxisLen/2 + errorPlotAxisStart )
-      .attr("y1", -barHeight / 2)
-      .attr("x2", errorPlotAxisLen/2 + errorPlotAxisStart )
-      .attr("y2", barHeight / 2)
-      .attr("stroke", "black")
-      .attr("stroke-dasharray", ("5, 3"))
-      .attr("stroke-width", "1");
-
     nodeEnter.append("rect")
       .attr("x", errorPlotAxisStart)
-      .attr("y", -barHeight / 2)
-      .attr("height", barHeight/2)
-      .attr("width", function (d) {return d.std;})
-      .style("fill", "gray")
+      .attr("y", -barHeight/2+barHeight/20)
+      .attr("height", barHeight/2-barHeight/20)
+      .attr("width", function (d) {return errorPlotAxisLen * d.std*2;})
+      .style("fill", "#1f77b4")
+      .on("mouseover", function(){return tooltip.style("visibility", "visible");})
+      .on("mousemove", function(d){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px").text('Standard devation of books: '+d.std);})
+      .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+ 
+    nodeEnter.append("rect")
+      .attr("x", errorPlotAxisStart)
+      .attr("y", 0)
+      .attr("height", barHeight/2-barHeight/20)
+      .attr("width", function (d) {return errorPlotAxisLen * d.stdsub*2;})
+      .style("fill", "#d62728")
+      .on("mouseover", function(){return tooltip.style("visibility", "visible");})
+      .on("mousemove", function(d){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px").text('Standard devation of subtopics: '+d.stdsub);})
+      .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
     // Transition nodes to their new position.
     nodeEnter.transition()
